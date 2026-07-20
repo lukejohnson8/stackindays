@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#2A2A2A"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SD Challenge"/>
+<title>Stackin' Days 60 Day Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+<style>
+:root{--dark:#2A2A2A;--orange:#9F512E;--orange2:#C4673A;--orangedim:rgba(159,81,46,0.12);--white:#fff;--surf:#F8F6F3;--surf2:#EFECE7;--txt:#2A2A2A;--txt2:#6B6560;--muted:#A09890;--border:rgba(42,42,42,0.11);--shadow:0 2px 12px rgba(42,42,42,0.07);--shadowlg:0 8px 32px rgba(42,42,42,0.13)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body,#app{height:100%;overflow:hidden;background:var(--surf)}
+body{font-family:'DM Sans',sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+.caveat{font-family:'Caveat',cursive}
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;background:none}
+input{font-family:inherit;outline:none}
+img{display:block}
+@keyframes check-pop{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+@keyframes streak-in{0%{transform:scale(0.8);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes fade-up{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes slide-in{0%{opacity:0;transform:translateX(-8px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.13);opacity:0}}
+@keyframes modal-in{0%{opacity:0;transform:translateY(100%)}100%{opacity:1;transform:translateY(0)}}
+@keyframes overlay-in{0%{opacity:0}100%{opacity:1}}
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(80px) rotate(400deg);opacity:0}}
+.anim-fade-up{animation:fade-up .4s ease forwards}
+.anim-modal{animation:modal-in .32s cubic-bezier(.25,.46,.45,.94) forwards}
+.anim-overlay{animation:overlay-in .22s ease forwards}
+.anim-streak{animation:streak-in .5s cubic-bezier(.34,1.56,.64,1) forwards}
+.pulse-ring{animation:pulse-ring 2.2s ease-out infinite}
+.btn-press:active{transform:scale(.96);transition:transform .1s}
+#app{display:flex;flex-direction:column}
+#topnav{flex-shrink:0;display:flex;align-items:center;padding-left:20px;padding-right:20px;background:var(--dark);height:calc(56px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px)}
+#topnav img{height:28px;object-fit:contain}
+#page{flex:1;overflow:hidden;display:flex;flex-direction:column}
+#tabbar{flex-shrink:0;display:flex;background:var(--white);border-top:1.5px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;color:var(--muted);transition:color .2s;position:relative;font-size:11px;font-weight:600}
+.tab-btn.active{color:var(--orange)}
+.tab-dot{width:4px;height:4px;border-radius:99px;background:var(--orange);position:absolute;bottom:6px}
+#home-page{display:flex;flex-direction:column;height:100%}
+#streak-section{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:20px 0 16px;border-bottom:1.5px solid var(--border);background:var(--white)}
+.streak-outer{position:relative;display:flex;align-items:center;justify-content:center}
+.pulse-r{position:absolute;border-radius:50%}
+.streak-circle{position:relative;width:200px;height:200px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .5s ease}
+.streak-circle.active{background:linear-gradient(145deg,#2A2A2A,#3D3530);box-shadow:0 12px 48px rgba(42,42,42,.28),inset 0 1px 0 rgba(255,255,255,.08);border:2px solid rgba(159,81,46,.4)}
+.streak-circle.inactive{background:linear-gradient(145deg,#EFECE7,#E8E4DE);box-shadow:0 4px 24px rgba(42,42,42,.1),inset 0 1px 0 rgba(255,255,255,.8);border:2px solid rgba(42,42,42,.08)}
+.streak-badge{position:absolute;top:-4px;right:-4px;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#9F512E,#C4673A);box-shadow:0 2px 8px rgba(159,81,46,.5);display:flex;align-items:center;justify-content:center}
+.streak-progress{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.streak-meta{margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.day-pill{font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;background:var(--surf2);color:var(--muted);border:1px solid var(--border)}
+.streak-status{font-size:13px;font-weight:500;color:var(--muted)}
+#items-section{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.items-header{padding:18px 20px 6px;display:flex;align-items:center;justify-content:space-between}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px;margin-bottom:8px;margin-top:14px}
+.items-list{padding:0 20px 8px}
+.item-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;margin-bottom:8px;cursor:pointer;transition:all .28s ease;border:1.5px solid var(--border);background:var(--white);box-shadow:var(--shadow)}
+.item-row.done{background:linear-gradient(135deg,rgba(159,81,46,.09),rgba(159,81,46,.04));border-color:rgba(159,81,46,.22);box-shadow:none}
+.item-label{flex:1;font-size:14px;font-weight:500;transition:all .22s}
+.item-label.done{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(160,152,144,.6)}
+.req-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--surf2);color:var(--muted);flex-shrink:0}
+.item-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+.item-check.unchecked{border:2px solid rgba(42,42,42,.18)}
+.item-check.checked{background:linear-gradient(135deg,#9F512E,#C4673A);box-shadow:0 2px 8px rgba(159,81,46,.35)}
+#settings-page{display:flex;flex-direction:column;height:100%}
+.settings-header{flex-shrink:0;padding:24px 20px 16px;border-bottom:1.5px solid var(--border);background:var(--white)}
+.settings-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 40px}
+.section-card{border-radius:16px;overflow:hidden;border:1.5px solid var(--border);background:var(--white);margin-bottom:16px}
+.card-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.card-item:last-child{border-bottom:none}
+.locked-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--surf2);color:var(--muted)}
+.progress-card{border-radius:16px;padding:16px;background:linear-gradient(135deg,#2A2A2A,#3D3530);border:1px solid rgba(255,255,255,.06);margin-bottom:16px}
+.progress-bar-track{height:5px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:10px}
+.progress-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#9F512E,#C4673A);transition:width .8s ease}
+.addon-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.addon-row:last-child{border-bottom:none}
+.btn-del{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.18);flex-shrink:0}
+.add-form{border-radius:16px;padding:14px;border:1.5px dashed var(--border);background:var(--white)}
+.emoji-btn{width:46px;height:46px;border-radius:12px;background:var(--surf);border:1.5px solid var(--border);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.emoji-grid{position:absolute;top:52px;left:0;z-index:10;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--shadowlg);padding:8px;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;width:200px}
+.emoji-opt{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:16px}
+.text-input{flex:1;height:46px;border-radius:12px;padding:0 12px;font-size:14px;font-weight:500;background:var(--surf);border:1.5px solid var(--border);color:var(--txt)}
+.btn-primary{width:100%;padding:13px;border-radius:14px;font-weight:600;font-size:14px;color:#fff;background:linear-gradient(135deg,#2A2A2A,#3D3530);transition:opacity .2s}
+.btn-primary:disabled{opacity:.4}
+.btn-secondary{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:14px;font-size:13px;font-weight:600;background:var(--white);border:1.5px solid var(--border);color:var(--txt2)}
+.btn-danger{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:14px;font-size:13px;font-weight:600;background:rgba(239,68,68,.06);border:1.5px solid rgba(239,68,68,.2);color:#ef4444}
+.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px}
+.overlay{position:fixed;inset:0;z-index:40;background:rgba(42,42,42,.45);backdrop-filter:blur(4px)}
+.sheet{position:fixed;bottom:0;left:0;right:0;z-index:50;border-radius:24px 24px 0 0;background:var(--white);box-shadow:0 -8px 48px rgba(42,42,42,.15)}
+.sheet-handle{width:36px;height:4px;border-radius:99px;background:var(--border);margin:12px auto 0}
+.sheet-content{padding:16px 24px 40px}
+#onboard-page{display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;height:100%}
+.onboard-inner{display:flex;flex-direction:column;align-items:center;padding:32px 24px 40px;text-align:center}
+.onboard-logo-box{width:80px;height:80px;border-radius:24px;background:var(--white);border:2px solid var(--border);box-shadow:var(--shadowlg);display:flex;align-items:center;justify-content:center;margin-bottom:18px;flex-shrink:0}
+.rules-box{width:100%;border-radius:16px;padding:14px;background:var(--orangedim);border:1.5px solid rgba(159,81,46,.2);text-align:left;margin-bottom:24px}
+.req-list-card{width:100%;border-radius:16px;overflow:hidden;border:1.5px solid var(--border);background:var(--white);margin-bottom:20px}
+.req-list-header{padding:10px 14px;background:var(--surf2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.req-list-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:500}
+.req-list-item:last-child{border-bottom:none}
+#complete-page{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px 24px;text-align:center;overflow:hidden;position:relative;background:linear-gradient(160deg,#2A2A2A 0%,#3D3530 50%,#2A2A2A 100%)}
+.confetti-piece{position:absolute;border-radius:3px}
+.stats-card{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 32px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);margin-bottom:24px;width:100%;max-width:320px}
+#install-prompt{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:0 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px)}
+.install-card{border-radius:16px;padding:14px;background:var(--white);border:1.5px solid var(--border);box-shadow:0 8px 32px rgba(42,42,42,.18);position:relative}
+.install-close{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--orangedim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--orange);flex-shrink:0}
+.share-icon-box{width:22px;height:22px;background:#007AFF;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin:0 3px}
+.add-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;background:var(--surf2);border:1px solid var(--border);font-size:11px;font-weight:500;vertical-align:middle;margin:0 3px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topnav">
+    <img id="nav-logo" src="data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsnGbkM7MkYPMXbilUC7iaJQNi4ZfCMzqu1zYD1xbeFN7Qc32yGa6SzD0Dz2gqg6C9BAbrKNmddSKjOOrs12tBMF4So3JUJaxG4Bcv6fVQzeHRAJ5e0uEwDTjuJDf0HJ4EAG8kpwMcZY6NXB3h/sscWcUHKTzAP/ZCY/JX5g364crMibqhyQMfezFWLyOJNy0xczo2nrVN+0Y+qmq/2rTlg8bfnBQQuVtNmspWwzbC4s5MmgDgb44KcBauc5LjhKaJaObQ+fKvderx1lO8+fvbPjBIK6ieBX5HJ1H3CCxxK6kXObklbU0eUZ6VGtCBaWcKeq8SmL3MA88S33Jj3nRmUlXGjjlIUSP5mKNkGcqZkoZKTtTR9G5a3vaepfCF2g28SuGeGgPU5JYKfwcUOUUFOzCRUzrTvUTYPOUde9E6kybuaHrScANBOZO2i6N0gMqi6DEYpGkAErHB+AafGgBWUDggjgAAAHAIAJ0BKoEAQwA+MRKIQqIhIRcflAAgAwS0gxQADZAPoABMSLtblzrUwsc4wc2gG8mNC1Pd1kLURsch/mXW9aMip/4vXl3xaNwwvgAA/vkan//cP//9wj///t/e/wur/qDAWrHf//7U9R74dP0waKH/kyoqP7Ymmj/yZUA+f8mWh+v3gCTv//7URAAAAAA=" alt="Stackin' Days"/>
+  </div>
+  <div id="page"></div>
+  <div id="tabbar" style="display:none">
+    <button class="tab-btn active" id="tab-home" onclick="switchTab('home')">
+      <svg style="margin-bottom:3px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Today<div class="tab-dot" id="dot-home"></div>
+    </button>
+    <button class="tab-btn" id="tab-settings" onclick="switchTab('settings')">
+      <svg style="margin-bottom:3px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </div>
+</div>
+<script>
+const WHITE_LOGO="data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsnGbkM7MkYPMXbilUC7iaJQNi4ZfCMzqu1zYD1xbeFN7Qc32yGa6SzD0Dz2gqg6C9BAbrKNmddSKjOOrs12tBMF4So3JUJaxG4Bcv6fVQzeHRAJ5e0uEwDTjuJDf0HJ4EAG8kpwMcZY6NXB3h/sscWcUHKTzAP/ZCY/JX5g364crMibqhyQMfezFWLyOJNy0xczo2nrVN+0Y+qmq/2rTlg8bfnBQQuVtNmspWwzbC4s5MmgDgb44KcBauc5LjhKaJaObQ+fKvderx1lO8+fvbPjBIK6ieBX5HJ1H3CCxxK6kXObklbU0eUZ6VGtCBaWcKeq8SmL3MA88S33Jj3nRmUlXGjjlIUSP5mKNkGcqZkoZKTtTR9G5a3vaepfCF2g28SuGeGgPU5JYKfwcUOUUFOzCRUzrTvUTYPOUde9E6kybuaHrScANBOZO2i6N0gMqi6DEYpGkAErHB+AafGgBWUDggjgAAAHAIAJ0BKoEAQwA+MRKIQqIhIRcflAAgAwS0gxQADZAPoABMSLtblzrUwsc4wc2gG8mNC1Pd1kLURsch/mXW9aMip/4vXl3xaNwwvgAA/vkan//cP//9wj///t/e/wur/qDAWrHf//7U9R74dP0waKH/kyoqP7Ymmj/yZUA+f8mWh+v3gCTv//7URAAAAAA=";
+const DARK_LOGO="data:image/webp;base64,UklGRlgMAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsnGbkM7MkYPMXbilUC7iaJQNi4ZfCMzqu1zYD1xbeFN7Qc32yGa6SzD0Dz2gqg6C9BAbrKNmddSKjOOrs12tBMF4So3JUJaxG4Bcv6fVQzeHRAJ5e0uEwDTjuJDf0HJ4EAG8kpwMcZY6NXB3h/sscWcUHKTzAP/ZCY/JX5g364crMibqhyQMfezFWLyOJNy0xczo2nrVN+0Y+qmq/2rTlg8bfnBQQuVtNmspWwzbC4s5MmgDgb44KcBauc5LjhKaJaObQ+fKvderx1lO8+fvbPjBIK6ieBX5HJ1H3CCxxK6kXObklbU0eUZ6VGtCBaWcKeq8SmL3MA88S33Jj3nRmUlXGjjlIUSP5mKNkGcqZkoZKTtTR9G5a3vaepfCF2g28SuGeGgPU5JYKfwcUOUUFOzCRUzrTvUTYPOUde9E6kybuaHrScANBOZO2i6N0gMqi6DEYpGkAErHB+AafGgBWUDggggoAADAuAJ0BKoEAQwA+MRaJQyIhIRT6TawgAwS0ojuBtAH9r+jnx+/n/5CedPhr82+1fnGeDXm3xN/cL9Nwk/DrUC/Iv5b/oPDt2BVXvQC9gPnf+k/s/5D+ed/XegH1c/4HuAfyL+Pf6f+zfuT8Jf57wffBvYD/i/8w/zn9x/b//LfS5+6/8b/Af5j9h/aV+Yf2H/f/3b4BP4z/Mv9B/cP8j/8P8r/////9wHrs/bH2IP1RN1610RXEQZbG8nadCTqnnSnD/1Fa99OVo8AA5t8GWpxO5nFiI5ZwAbKkgdHBQW2rIJW2jBSTy9L2cQBhwj6IDtYGcYYzlBtfZiHP9vPp8loQKA9sTNxLfHtPzcdaCyKCnmxNoa3ucOBDJfaSqtAbn952m1A5nGkTD0a8hW8o7Vl4KG2RB8t9QurIm0pQabJ/N6QzpHuvF9z4AkXZJaZFo6/yHLVOpDZUkSGY1i/eW+Zump9zEFyCr8ksiXMU0rqxZoLSHD89rzCpSAD+/JyvMGFIsCnJWchjNfwW2fBrnqcBE7/G2EOv6bskhhbs9aEOtXBtw14VK7NrQ60uBNARXGRPXNVcguH2jSANWSPXQAxkItS0EJc9gJS9631Rq1/t2FSgJnbgKP7jNmfPaJ5zfdzNE7iwEXRgT1Evi2iLKtuNGcxPEsWkYo/6/V59YoAU44wvxtp+d7tbMJHb2Gu4Sh+S66HJzFUucB9XJbeUXWD/uNcaphtEWbEoRvLCJVpnV7JOC+dE+sTjRXQsurYFP57Lpna+4LiOTdjczf+lNHsM0z1H/qbXvD2TRxvb/SSwkrz6AwAWWL1oyl/q6GNedwqLl+RZs4SxmYZvZiGvI4/MaA0mt43Jb51aTegf1w8yBPV88zwbsoDTBDBXueB9gih3CNXovlgZxNrSiVdRgvgM2zLx8C3YSD/rF7cei7+A6tBMbKIXwnLZxMymnAaARZ7B0b+ar+vnHVOD/IrY5c8WhoNClPpsYJLPnJC/yM8DBOBfP6wECfZopMeiimXLeKvQPKBjSiDmNo7Na3TRTvZhI4QQEjdVFLnAnZYvCQjrqS42ccmc+nQF0Kfx6bGWKc9DtliJ4ZOnPSJlNvFXK6b+hPknSeyj8h1a7zTTmiYtbbYktn4OaTU+0P3uSg3eFpTVt3drv/U0yE4qP84zoLQlIdwW/ZdGwiPy6hcW/IjDI/+SswrVy5A/qRbN8HC8e6+ePRb5+Fz7eQ3JVSkLh+8Mt3V4vxGqSMZN+hJyLzk8h/rmLT8/2Jg/LYOeqBTowVUzJYmMAS74ZTlNQVhO39siHBBC9gzTznM+h1bkLUeQazkBVd14gdWVRKeqR5xWU1/+j2pTImKy/2fnWvRwbn5pJQVcCEod5JtjWpd2UQoOYPmDMQFlsyE/i2M7eI4o00RqfHZbMe2cPK1UqtrzVevY5yHHXJ8R78pk5vNb9sCA2yUnb/GqxrbxA8o+sRdoSCn3Xv095vjXrc2Zti0s+x4YhZyWKMWqO2ayLm4Y2SFnNwe2IEu3+8Ap4mPalXeHEEjbUBs1yeMcNgZK6zlcu/aZSDha8ALHtLM2xIBxaaageOwlw2RaE3dCPXVitKNfuzpxKtxUgdCitqKTvPtAJqRgROp/79yLCd2eZzNs9rkPJSxFoman9kGedbhrV/rWSRr85i7BvxfHJH4/nl/Da401k4uSc7GumQvXLTlnavbO3RvGg3W0W/0fYDs5RALXL9+UDu0M1qfSvZ3fjcjB+8AgUFVbv/42y0p5H3w/oQJVVvszURjrlG26EElSGZNvAFgEL5E7+OniZwnzx88d458YeS2xHVNsMZeOl1SH+UoLbPtBe54+nvl68KFGatlIfLVpGrxYkZPlrLiS7ozc3z+SM6LBwfUE2ILi6CTLkKRPcJXX8ZYhfPrF455yAODY9rIiCrscAP5Hse5HKsRtj5UF/VbBLGZK2ZT+KlqA4UgEn7bMnFBAHjyjP6Sw4sKOL8TLGJI8oaLQWvc7uoFzyug9Stql0S9q648wmzpKCUeZGyASyIPL8X5Kx+Wqv/ZEr7rb5sSssAIYFxrVXrnfUdlShEu/eHsi9FxsTNfmHtEuS6kn4p8EFzZAsC/hBpOjQcT4ELeb4FliQTz0VshfxagJ2jd9l96P+ljkrz7OrZquP+/lfpCG0sGUOeuOzj6F3BIMZhy5O7p+ste/DhkYE2xPfRlEys0WRSzuqM78dolNSG7TRWcYr4WHknF+QfF1UYqxwBqAL8MhkIpi044SZe7QQEyS+jQTAynYTOi3BYLFUTNzL7c3WNlQarl8Z4kDQz9i6S2PWpAGvFDDR1DwFEWjc3MgcuClmnO1uoGDAP/yQuzl77b1ZA4VyDJCyfxShRUJL8KP76Ja754mXaLVjKk6e+Fo6EL3oRu00DHCfpyf4ThwyWqBYZsIBn+ehCGwtWF7Vz4qp8k843vA/jlgj9TNOvtrWTPXGPOaVr+Ghs72Nq7QzqW/zEoOzMwsPFoZA63X9sBv4Uek8+JeZ+mZI7ZtYGZHzOoJ4PECsQH/oAWRW6NNzrU8mm5HsvU2/4FzWMvpg9QuLWxIwhwIliA+VQH4uSproyJPp7c818rxEyciGINgTwWrp8dSSKcUaJEJJ6mbd8/ytetDgo3SAxmroJar+FZKvLIHC3tCwX4qjJOjy4U90hnYx3xGGblaEEkw+icm2uEIGXtSlRaFdBIhceVUFSzjzANmuQBboP44ZNBRgxbKNoGExq5RzK5i4OFlXRqRYzHd5hx3YB7YP0/t7qHvQ+A4c45dtN279nZgRjkEju7uQvNzGhW6f3aMtlft0hbLYm4XZIL0c6Bch+v03UWyznq+454RA1xiINzWvrCVHfhbmB6SqB/V/BPN4W/3RogVTgjNdl3AB/Mar1qXpLUh3cms8Ojf5f8M6wlmEq8VAprTPF0hV+Reaj6+sAOBeQZDY3sHmxgeEzlCRRWpO4VFmDiSHqK/AJ0vQshcdQNn3zRkpPjrm8Nn7CGfJ+8xfufwrYG+L4WfVCunFvF5Cbkg1keMCPU5sh4uqyE/vc5CAPpZP5jyCLSpQg+RUJc/aGj4Gybem0m3SiETx0qTh01s+LJaoUNonfy2O2Gmzl965+mxwhqYe+8n+cVh0PWgXueaIkotLYf97PyhQ6lYnr29lxnU5GzwQm22nSfJixQWoX/OLIFvI7sF5x9CbwtGl0z4m4bwFFlAuwwRnab8A6Sj8CB2DGO1x/tYUvbOp29BGqv95btSJib+XS6VgUlvDd624z4h/vHeSqkAd+mGBESgJwyVhWlsj5i4a0foqfPacbsi6UHeTFLhK/wbz5Qz44BTWAir6Y70OxL5ATMkdDQbqH0Vc2lA6fHee96QTDyNCY1+ksHqzzaOVz8HOKa5OrInHUrj5sgFlR0YqmsAGp1lDD+NGUzC+rPJ5wbzGXe6/eVUZGw+K9IUaIzvbhyr1C3Qngn/xkAcFZOIb/ZTTsKN2g4MjLicmFY3ZkSfnv9QxJjhgxk1rDmxkWvrfBIqB+BNlzE5FoC0z9UrJF9NANlZy3ZgfF5l/MCwBH1pNSWqB4aNe9I389Pzmj//7gmAAAAA";
+
+const CHALLENGE_DAYS=60;
+const REQUIRED=[
+  {id:'word',label:"Read God's Word",emoji:'📖'},
+  {id:'workout',label:'Workout',emoji:'💪'},
+  {id:'alcohol',label:'No Alcohol',emoji:'🚫'},
+  {id:'steps',label:'10K Steps',emoji:'👟'},
+  {id:'food',label:'Track Food Intake',emoji:'🥗'},
+  {id:'hydrate',label:'Properly Hydrate',emoji:'💧'}
+];
+const EMOJIS=['⭐','🎯','📚','🧘','🛌','🧠','🌿','✍️','🎵','🏃','🚴','🥦','🍎','💊','☀️','🌊','🤝','💼'];
+
+const db=new Dexie('StackinDaysChallenge');
+db.version(1).stores({days:'++id,date',challenge:'++id'});
+
+function toDateStr(d){return d.toISOString().slice(0,10)}
+function today(){return toDateStr(new Date())}
+function allItemIds(c){return[...REQUIRED.map(r=>r.id),...(c||[]).map(x=>x.id)]}
+function isDayComplete(rec,ci){if(!rec)return false;return allItemIds(ci).every(id=>rec.completed.includes(id))}
+function calcStreak(days,ci){
+  const map=new Map(days.map(d=>[d.date,d]));
+  let s=0;const d=new Date(today()+'T12:00:00');
+  for(let i=0;i<65;i++){
+    const ds=toDateStr(d);const rec=map.get(ds);
+    if(ds===today()){if(isDayComplete(rec,ci))s++;d.setDate(d.getDate()-1);continue;}
+    if(isDayComplete(rec,ci))s++;else break;
+    d.setDate(d.getDate()-1);
+  }
+  return s;
+}
+function challengeDay(sd){
+  const start=new Date(sd+'T12:00:00'),now=new Date(today()+'T12:00:00');
+  return Math.min(Math.floor((now-start)/86400000)+1,CHALLENGE_DAYS);
+}
+function isChallengeComplete(days,ci,sd){
+  const start=new Date(sd+'T12:00:00');let c=0;
+  for(let i=0;i<CHALLENGE_DAYS;i++){
+    const d=new Date(start);d.setDate(d.getDate()+i);
+    const rec=days.find(r=>r.date===toDateStr(d));
+    if(isDayComplete(rec,ci))c++;
+  }
+  return c===CHALLENGE_DAYS;
+}
+function formatDate(ds){return new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}
+
+let S={challenge:null,days:[],todayRec:null,activeTab:'home',newEmoji:'⭐',showEmoji:false,newLabel:'',ci:[]};
+
+async function loadData(){
+  S.challenge=await db.challenge.toCollection().first()||null;
+  S.days=await db.days.toArray();
+  S.todayRec=await db.days.where('date').equals(today()).first()||null;
+  S.ci=S.challenge?S.challenge.customItems||[]:[];
+  render();
+}
+
+async function startChallenge(){
+  await db.transaction('rw',db.challenge,db.days,async()=>{await db.challenge.clear();await db.days.clear();await db.challenge.add({startDate:today(),customItems:[]});});
+  S.ci=[];await loadData();
+}
+async function toggleItem(id){
+  const rec=await db.days.where('date').equals(today()).first();
+  if(rec){const has=rec.completed.includes(id);await db.days.update(rec.id,{completed:has?rec.completed.filter(x=>x!==id):[...rec.completed,id]});}
+  else{await db.days.add({date:today(),completed:[id],startedAt:new Date().toISOString()});}
+  await loadData();
+}
+async function addCustomItem(){
+  if(!S.newLabel.trim()||S.ci.length>=3)return;
+  const item={id:'custom_'+Date.now(),label:S.newLabel.trim(),emoji:S.newEmoji};
+  const updated=[...S.ci,item];
+  const ch=await db.challenge.toCollection().first();
+  if(ch)await db.challenge.update(ch.id,{customItems:updated});
+  S.ci=updated;S.newLabel='';S.newEmoji='⭐';S.showEmoji=false;
+  await loadData();
+}
+async function removeCustomItem(id){
+  const updated=S.ci.filter(c=>c.id!==id);
+  const ch=await db.challenge.toCollection().first();
+  if(ch)await db.challenge.update(ch.id,{customItems:updated});
+  S.ci=updated;await loadData();
+}
+async function exportData(){
+  const[ch,dy]=await Promise.all([db.challenge.toArray(),db.days.toArray()]);
+  const json=JSON.stringify({challenge:ch,days:dy,exportedAt:new Date().toISOString()},null,2);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download='stackindays-'+today()+'.json';a.click();
+}
+async function importDataFile(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{const data=JSON.parse(await f.text());
+      await db.transaction('rw',db.challenge,db.days,async()=>{
+        await db.challenge.clear();await db.days.clear();
+        if(data.challenge)await db.challenge.bulkAdd(data.challenge.map(c=>({...c,id:undefined})));
+        if(data.days)await db.days.bulkAdd(data.days.map(d=>({...d,id:undefined})));
+      });await loadData();
+    }catch{alert("Couldn't import — check it's a valid backup.");}
+  };inp.click();
+}
+
+function switchTab(tab){
+  S.activeTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const dot=document.getElementById('dot-home');if(dot)dot.style.display=tab==='home'?'block':'none';
+  renderPage();
+}
+
+function render(){
+  const tb=document.getElementById('tabbar');
+  if(!S.challenge){tb.style.display='none';document.getElementById('page').innerHTML=renderOnboard();return;}
+  if(isChallengeComplete(S.days,S.ci,S.challenge.startDate)){tb.style.display='none';document.getElementById('page').innerHTML=renderComplete();setTimeout(startConfetti,300);return;}
+  tb.style.display='flex';renderPage();
+}
+function renderPage(){
+  if(S.activeTab==='home')document.getElementById('page').innerHTML=renderHome();
+  else document.getElementById('page').innerHTML=renderSettings();
+}
+
+function renderHome(){
+  const streak=calcStreak(S.days,S.ci),todayComplete=isDayComplete(S.todayRec,S.ci);
+  const dayNum=challengeDay(S.challenge.startDate);
+  const done=new Set(S.todayRec?S.todayRec.completed:[]);
+  const total=allItemIds(S.ci).length,doneCount=allItemIds(S.ci).filter(id=>done.has(id)).length;
+  const isActive=streak>0,R=96,C=2*Math.PI*R,off=C*(1-Math.min(streak/CHALLENGE_DAYS,1));
+  const svgArc=streak>0?`<defs><linearGradient id="pg"><stop offset="0%" stop-color="#9F512E"/><stop offset="100%" stop-color="#C4673A"/></linearGradient></defs><circle cx="106" cy="106" r="${R}" fill="none" stroke="url(#pg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset .8s ease"/>`:'';
+  const pulseRings=isActive?`<div class="pulse-r pulse-ring" style="width:220px;height:220px;border:2px solid rgba(159,81,46,.3)"></div><div class="pulse-r pulse-ring" style="width:220px;height:220px;border:2px solid rgba(159,81,46,.15);animation-delay:.7s"></div>`:'';
+  const badge=todayComplete?`<div class="streak-badge"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`:'';
+  const status=todayComplete?'🥞 All done for today!':streak>0?`Keep it going — ${streak} day${streak!==1?'s':''} strong`:'Complete all items to start your streak';
+  const reqItems=REQUIRED.map((it,i)=>itemRow(it.id,it.label,it.emoji,done.has(it.id),true,i)).join('');
+  const addons=S.ci.length?`<div class="section-label">Your Add-Ons</div><div class="items-list">${S.ci.map((it,i)=>itemRow(it.id,it.label,it.emoji,done.has(it.id),false,REQUIRED.length+i)).join('')}</div>`:'';
+  return `<div id="home-page">
+    <div id="streak-section">
+      <div class="streak-outer">
+        ${pulseRings}
+        <svg class="streak-progress" width="212" height="212" viewBox="0 0 212 212">
+          <circle cx="106" cy="106" r="${R}" fill="none" stroke="rgba(42,42,42,0.08)" stroke-width="5"/>
+          ${svgArc}
+        </svg>
+        <div class="streak-circle ${isActive?'active':'inactive'}">
+          ${badge}
+          <img src="${WHITE_LOGO}" style="width:78px;object-fit:contain;margin-bottom:10px;opacity:${isActive?.88:.3};${isActive?'':'filter:brightness(0)'}"/>
+          <div style="font-family:'Caveat',cursive;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:${isActive?'rgba(255,255,255,.55)':'var(--muted)'};margin-bottom:3px">Days Stacked</div>
+          <div class="anim-streak" style="font-family:'Caveat',cursive;font-weight:700;font-size:${streak>=100?44:58}px;line-height:1.05;color:${isActive?'#fff':'var(--txt2)'};padding-bottom:2px">${streak}</div>
+        </div>
+      </div>
+      <div class="streak-meta">
+        <div class="day-pill">Day ${dayNum} of ${CHALLENGE_DAYS}</div>
+        <div class="streak-status">${status}</div>
+      </div>
+    </div>
+    <div id="items-section">
+      <div class="items-header">
+        <div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Today</div>
+          <div style="font-family:'Caveat',cursive;font-size:20px;font-weight:600;color:var(--txt)">${formatDate(today())}</div>
+        </div>
+        <div style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:${todayComplete?'var(--orangedim)':'var(--surf2)'};color:${todayComplete?'var(--orange)':'var(--muted)'}">${doneCount}/${total}</div>
+      </div>
+      <div class="section-label">Required</div>
+      <div class="items-list">${reqItems}</div>
+      ${addons}
+      <div style="height:20px"></div>
+    </div>
+  </div>`;
+}
+
+function itemRow(id,label,emoji,done,req,i){
+  return `<div class="item-row${done?' done':''}" onclick="handleToggle('${id}')" style="animation:slide-in .28s ease ${i*.05}s both">
+    <span style="font-size:20px;flex-shrink:0;line-height:1">${emoji}</span>
+    <span class="item-label${done?' done':''}">${label}</span>
+    ${req&&!done?'<span class="req-badge">REQ</span>':''}
+    <div class="item-check ${done?'checked':'unchecked'}" id="chk-${id}">
+      ${done?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L4.5 8.5L10 3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+    </div>
+  </div>`;
+}
+
+async function handleToggle(id){
+  const c=document.getElementById('chk-'+id);
+  if(c){c.style.animation='check-pop .3s cubic-bezier(.34,1.56,.64,1)';setTimeout(()=>c.style.animation='',350);}
+  await toggleItem(id);
+}
+
+function renderSettings(){
+  const dayNum=challengeDay(S.challenge.startDate),pct=Math.round(dayNum/CHALLENGE_DAYS*100);
+  const startFmt=new Date(S.challenge.startDate+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const reqHTML=REQUIRED.map(it=>`<div class="card-item"><span style="font-size:18px">${it.emoji}</span><span style="font-size:13px;font-weight:500;flex:1">${it.label}</span><span class="locked-badge">LOCKED</span></div>`).join('');
+  const addonsHTML=S.ci.map(it=>`<div class="addon-row"><span style="font-size:18px;flex-shrink:0">${it.emoji}</span><span style="font-size:13px;font-weight:500;flex:1;padding:0 8px">${it.label}</span><button class="btn-del btn-press" onclick="removeCustomItem('${it.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div>`).join('');
+  const emojiGrid=S.showEmoji?`<div class="emoji-grid">${EMOJIS.map(e=>`<button class="emoji-opt btn-press" onclick="pickEmoji('${e}')">${e}</button>`).join('')}</div>`:'';
+  const addForm=S.ci.length<3?`<div class="add-form"><div style="display:flex;gap:8px;margin-bottom:10px;position:relative"><button class="emoji-btn btn-press" onclick="toggleEmoji()">${S.newEmoji}</button>${emojiGrid}<input class="text-input" placeholder="Add-on name..." value="${S.newLabel}" oninput="S.newLabel=this.value" onkeydown="if(event.key==='Enter')addCustomItem()"/></div><button class="btn-primary btn-press" onclick="addCustomItem()" ${!S.newLabel.trim()?'disabled':''}>+ Add Item</button></div>`:'<div style="font-size:12px;text-align:center;color:var(--muted);padding:8px 0">Maximum 3 add-ons reached</div>';
+  return `<div id="settings-page">
+    <div class="settings-header">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Challenge</div>
+      <div class="caveat" style="font-size:24px;font-weight:600">Settings</div>
+    </div>
+    <div class="settings-content">
+      <div class="progress-card">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(255,255,255,.4)">60 Day Challenge</div>
+          <div class="caveat" style="font-size:18px;font-weight:600;color:#fff;margin-top:2px">Day ${dayNum} of ${CHALLENGE_DAYS}</div></div>
+          <div class="caveat" style="font-size:30px;font-weight:700;color:#C4673A">${pct}%</div>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:6px">Started ${startFmt}</div>
+      </div>
+      <div class="section-title">Required Items</div>
+      <div class="section-card">${reqHTML}</div>
+      <div class="section-title">Your Add-Ons (${S.ci.length}/3)</div>
+      <div style="margin-bottom:16px">${addonsHTML}${addForm}</div>
+      <div class="section-title">Your Data</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn-secondary btn-press" style="flex:1" onclick="exportData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+        <button class="btn-secondary btn-press" style="flex:1" onclick="importDataFile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>
+      </div>
+      <div class="section-title">Danger Zone</div>
+      <button class="btn-danger btn-press" onclick="confirmRestart()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>Restart Challenge</button>
+    </div>
+  </div>`;
+}
+
+function renderOnboard(){
+  const reqHTML=REQUIRED.map(it=>`<div class="req-list-item"><span style="font-size:18px">${it.emoji}</span>${it.label}</div>`).join('');
+  const rules=['Complete all 6 items every single day','Miss one item = streak resets to 0','Add up to 3 personal add-ons','Reach 60 consecutive days to win'];
+  return `<div id="onboard-page"><div class="onboard-inner anim-fade-up">
+    <div class="onboard-logo-box"><img src="${DARK_LOGO}" style="width:56px;object-fit:contain"/></div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:6px">Stackin' Days</div>
+    <div class="caveat" style="font-size:40px;font-weight:700;line-height:1.1;margin-bottom:8px;color:var(--txt)">60 Day<br>Challenge</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.65;max-width:300px;margin-bottom:22px">60 days. 6 daily requirements. No excuses. Complete every item every day or your streak resets to zero.</p>
+    <div class="req-list-card"><div class="req-list-header">Daily Requirements</div>${reqHTML}</div>
+    <div class="rules-box">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);margin-bottom:8px">The Rules</div>
+      ${rules.map(r=>`<div style="display:flex;gap:8px;margin-bottom:6px;font-size:12px;font-weight:500;color:var(--orange);opacity:.85"><span>→</span><span>${r}</span></div>`).join('')}
+    </div>
+    <button class="btn-primary btn-press" style="max-width:320px;font-size:15px" onclick="startChallenge()">Start the Challenge →</button>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px">You can add personal add-ons after starting</p>
+  </div></div>`;
+}
+
+function renderComplete(){
+  return `<div id="complete-page">
+    <div id="confetti-container"></div>
+    <div class="anim-fade-up" style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center">
+      <div style="font-size:72px;margin-bottom:16px">🏆</div>
+      <img src="${WHITE_LOGO}" style="width:110px;margin-bottom:20px;object-fit:contain;opacity:.9"/>
+      <div class="caveat" style="font-size:44px;font-weight:700;color:#fff;line-height:1.1;margin-bottom:10px">Challenge<br>Complete!</div>
+      <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:6px">60 Days. No excuses. All done.</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.4);line-height:1.6;max-width:300px;margin-bottom:24px">You showed up every single day. That's rare. That's Stackin' Days.</p>
+      <div class="stats-card">
+        <div style="text-align:center"><div class="caveat" style="font-size:42px;font-weight:700;color:#fff">60</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4)">Days</div></div>
+        <div style="width:1px;height:36px;background:rgba(255,255,255,.12)"></div>
+        <div style="text-align:center"><div class="caveat" style="font-size:42px;font-weight:700;color:#C4673A">100%</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4)">Complete</div></div>
+      </div>
+      <button class="btn-press" style="width:100%;max-width:320px;padding:16px;border-radius:16px;font-weight:600;font-size:15px;color:#fff;background:linear-gradient(135deg,#9F512E,#C4673A);font-family:inherit" onclick="startChallenge()">Start Another Challenge</button>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">Export your data first to save your progress.</p>
+    </div>
+  </div>`;
+}
+
+function startConfetti(){
+  const c=document.getElementById('confetti-container');if(!c)return;
+  const cols=['#9F512E','#C4673A','#ffffff','#D4916A','#E8B89A'];
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');p.className='confetti-piece';
+    Object.assign(p.style,{left:Math.random()*100+'%',top:Math.random()*30+'%',width:(6+Math.random()*8)+'px',height:(6+Math.random()*8)+'px',background:cols[Math.floor(Math.random()*cols.length)],animationDelay:Math.random()*.8+'s',animationDuration:(.8+Math.random()*.7)+'s',opacity:0,position:'absolute',borderRadius:'3px'});
+    c.appendChild(p);
+  }
+}
+
+function toggleEmoji(){S.showEmoji=!S.showEmoji;renderPage();}
+function pickEmoji(e){S.newEmoji=e;S.showEmoji=false;renderPage();}
+
+function confirmRestart(){
+  const ov=document.createElement('div');ov.className='overlay anim-overlay';ov.id='rst-ov';ov.onclick=closeConfirm;
+  const sh=document.createElement('div');sh.className='sheet anim-modal';
+  sh.innerHTML='<div class="sheet-handle"></div><div class="sheet-content"><div style="font-size:44px;text-align:center;margin-bottom:8px">⚠️</div><div class="caveat" style="font-size:22px;font-weight:600;text-align:center;margin-bottom:6px">Restart Challenge?</div><p style="font-size:13px;text-align:center;color:var(--muted);margin-bottom:24px">This erases all progress. Export first if you want to save it.</p><div style="display:flex;gap:10px"><button class="btn-secondary btn-press" style="flex:1;padding:14px" onclick="closeConfirm()">Cancel</button><button class="btn-press" style="flex:1;padding:14px;border-radius:14px;font-weight:600;font-size:14px;background:#ef4444;color:#fff;font-family:inherit" onclick="doRestart()">Restart</button></div></div>';
+  document.body.appendChild(ov);document.body.appendChild(sh);
+}
+function closeConfirm(){document.getElementById('rst-ov')?.remove();document.querySelector('.sheet')?.remove();}
+async function doRestart(){closeConfirm();S.ci=[];await startChallenge();}
+
+// Install prompt
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;setTimeout(()=>showInstallPrompt('android'),2500);});
+function showInstallPrompt(type){
+  if(sessionStorage.getItem('inst_dismissed'))return;
+  const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  if(standalone)return;
+  const el=document.createElement('div');el.id='install-prompt';el.className='anim-overlay';
+  if(type==='ios'){
+    el.innerHTML=`<div class="install-card"><button class="install-close btn-press" onclick="dismissInstall()"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="2.2"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="${WHITE_LOGO}" style="width:24px"/></div><div><div style="font-size:13px;font-weight:600">Add to Home Screen</div><div style="font-size:11px;color:var(--muted)">Get the full app experience</div></div></div><div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><div class="step-num">1</div><div style="font-size:13px">Tap the <span class="share-icon-box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span> Share button</div></div><div style="display:flex;align-items:center;gap:8px"><div class="step-num">2</div><div style="font-size:13px">Tap <span class="add-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to Home Screen</span></div></div></div></div>`;
+  } else {
+    el.innerHTML=`<div class="install-card" style="display:flex;align-items:center;gap:10px"><button class="install-close btn-press" onclick="dismissInstall()"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="2.2"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button><div style="width:40px;height:40px;border-radius:10px;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="${WHITE_LOGO}" style="width:28px"/></div><div style="flex:1;min-width:0;padding-right:20px"><div style="font-size:13px;font-weight:600">Install Stackin' Days</div><div style="font-size:11px;color:var(--muted)">Add to home screen</div></div><button class="btn-press" style="flex-shrink:0;padding:8px 14px;border-radius:12px;font-weight:600;font-size:13px;background:linear-gradient(135deg,#2A2A2A,#3D3530);color:#fff;font-family:inherit" onclick="doInstall()">Install</button></div>`;
+  }
+  document.body.appendChild(el);
+}
+function dismissInstall(){sessionStorage.setItem('inst_dismissed','1');document.getElementById('install-prompt')?.remove();}
+async function doInstall(){if(deferredInstall){await deferredInstall.prompt();dismissInstall();}}
+
+const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+if(!standalone&&/iphone|ipad|ipod/i.test(navigator.userAgent))setTimeout(()=>showInstallPrompt('ios'),2500);
+
+loadData();
+</script>
+</body>
+</html>
