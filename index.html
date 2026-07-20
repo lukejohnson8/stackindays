@@ -7,12 +7,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="SD Challenge"/>
+<link rel="apple-touch-icon" href="data:image/webp;base64,UklGRlgMAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsFpDLBg6EB/hhqvn/PwUxyVCYu+nAbzKVPSGfX5A+ANn3h4EX3dUpxC0OMsXNJLMvAEGVTHCdMgW3yArpGJyy1Aqd4AMyAP7//Z+ABwD++P3//n8A/vjjjzwA5gEA"/>
 <title>Stackin' Days 60 Day Challenge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <style>
-:root{--dark:#2A2A2A;--orange:#9F512E;--orange2:#C4673A;--orangedim:rgba(159,81,46,0.12);--white:#fff;--surf:#F8F6F3;--surf2:#EFECE7;--txt:#2A2A2A;--txt2:#6B6560;--muted:#A09890;--border:rgba(42,42,42,0.11);--shadow:0 2px 12px rgba(42,42,42,0.07);--shadowlg:0 8px 32px rgba(42,42,42,0.13)}
+:root{--dark:#2A2A2A;--orange:#9F512E;--orange2:#C4673A;--orangedim:rgba(159,81,46,0.12);--white:#fff;--surf:#F8F6F3;--surf2:#EFECE7;--txt:#2A2A2A;--txt2:#6B6560;--muted:#A09890;--border:rgba(42,42,42,0.08);--shadowlg:0 12px 32px rgba(42,42,42,0.16)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body,#app{height:100%;overflow:hidden;background:var(--surf)}
 body{font-family:'DM Sans',sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
@@ -40,7 +41,7 @@ img{display:block}
 #topnav img{height:28px;object-fit:contain}
 #page{flex:1;overflow:hidden;display:flex;flex-direction:column}
 #tabbar{flex-shrink:0;display:flex;background:var(--white);border-top:1.5px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px)}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;color:var(--muted);transition:color .2s;position:relative;font-size:11px;font-weight:600}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;color:var(--muted);transition:color .2s;position:relative;font-size:11px;font-weight:600;text-decoration:none}
 .tab-btn.active{color:var(--orange)}
 .tab-dot{width:4px;height:4px;border-radius:99px;background:var(--orange);position:absolute;bottom:6px}
 #home-page{display:flex;flex-direction:column;height:100%}
@@ -51,6 +52,7 @@ img{display:block}
 .streak-circle.active{background:linear-gradient(145deg,#2A2A2A,#3D3530);box-shadow:0 12px 48px rgba(42,42,42,.28),inset 0 1px 0 rgba(255,255,255,.08);border:2px solid rgba(159,81,46,.4)}
 .streak-circle.inactive{background:linear-gradient(145deg,#EFECE7,#E8E4DE);box-shadow:0 4px 24px rgba(42,42,42,.1),inset 0 1px 0 rgba(255,255,255,.8);border:2px solid rgba(42,42,42,.08)}
 .streak-badge{position:absolute;top:-4px;right:-4px;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#9F512E,#C4673A);box-shadow:0 2px 8px rgba(159,81,46,.5);display:flex;align-items:center;justify-content:center}
+.streak-badge svg{animation:check-pop .6s cubic-bezier(.34,1.56,.64,1)}
 .streak-progress{position:absolute;top:0;left:0;transform:rotate(-90deg)}
 .streak-meta{margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:4px}
 .day-pill{font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;background:var(--surf2);color:var(--muted);border:1px solid var(--border)}
@@ -59,7 +61,7 @@ img{display:block}
 .items-header{padding:18px 20px 6px;display:flex;align-items:center;justify-content:space-between}
 .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px;margin-bottom:8px;margin-top:14px}
 .items-list{padding:0 20px 8px}
-.item-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;margin-bottom:8px;cursor:pointer;transition:all .28s ease;border:1.5px solid var(--border);background:var(--white);box-shadow:var(--shadow)}
+.item-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;margin-bottom:8px;cursor:pointer;transition:all .28s ease;border:1.5px solid var(--border);background:var(--white)}
 .item-row.done{background:linear-gradient(135deg,rgba(159,81,46,.09),rgba(159,81,46,.04));border-color:rgba(159,81,46,.22);box-shadow:none}
 .item-label{flex:1;font-size:14px;font-weight:500;transition:all .22s}
 .item-label.done{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(160,152,144,.6)}
@@ -82,13 +84,13 @@ img{display:block}
 .btn-del{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.18);flex-shrink:0}
 .add-form{border-radius:16px;padding:14px;border:1.5px dashed var(--border);background:var(--white)}
 .emoji-btn{width:46px;height:46px;border-radius:12px;background:var(--surf);border:1.5px solid var(--border);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.emoji-grid{position:absolute;top:52px;left:0;z-index:10;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--shadowlg);padding:8px;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;width:200px}
+.emoji-grid{position:absolute;top:52px;left:0;z-index:10;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--shadowlg);padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
 .emoji-opt{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:16px}
 .text-input{flex:1;height:46px;border-radius:12px;padding:0 12px;font-size:14px;font-weight:500;background:var(--surf);border:1.5px solid var(--border);color:var(--txt)}
 .btn-primary{width:100%;padding:13px;border-radius:14px;font-weight:600;font-size:14px;color:#fff;background:linear-gradient(135deg,#2A2A2A,#3D3530);transition:opacity .2s}
 .btn-primary:disabled{opacity:.4}
-.btn-secondary{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:14px;font-size:13px;font-weight:600;background:var(--white);border:1.5px solid var(--border);color:var(--txt2)}
-.btn-danger{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:14px;font-size:13px;font-weight:600;background:rgba(239,68,68,.06);border:1.5px solid rgba(239,68,68,.2);color:#ef4444}
+.btn-secondary{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:14px;font-size:13px;font-weight:600;background:var(--white);border:1.5px solid var(--border);color:var(--txt);transition:all .2s}
+.btn-danger{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:14px;font-size:13px;font-weight:600;background:rgba(239,68,68,.06);border:1.5px solid rgba(239,68,68,.2);color:#ef4444;transition:all .2s}
 .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px}
 .overlay{position:fixed;inset:0;z-index:40;background:rgba(42,42,42,.45);backdrop-filter:blur(4px)}
 .sheet{position:fixed;bottom:0;left:0;right:0;z-index:50;border-radius:24px 24px 0 0;background:var(--white);box-shadow:0 -8px 48px rgba(42,42,42,.15)}
@@ -96,27 +98,27 @@ img{display:block}
 .sheet-content{padding:16px 24px 40px}
 #onboard-page{display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;height:100%}
 .onboard-inner{display:flex;flex-direction:column;align-items:center;padding:32px 24px 40px;text-align:center}
-.onboard-logo-box{width:80px;height:80px;border-radius:24px;background:var(--white);border:2px solid var(--border);box-shadow:var(--shadowlg);display:flex;align-items:center;justify-content:center;margin-bottom:18px;flex-shrink:0}
+.onboard-logo-box{width:80px;height:80px;border-radius:24px;background:var(--white);border:2px solid var(--border);box-shadow:var(--shadowlg);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
 .rules-box{width:100%;border-radius:16px;padding:14px;background:var(--orangedim);border:1.5px solid rgba(159,81,46,.2);text-align:left;margin-bottom:24px}
 .req-list-card{width:100%;border-radius:16px;overflow:hidden;border:1.5px solid var(--border);background:var(--white);margin-bottom:20px}
 .req-list-header{padding:10px 14px;background:var(--surf2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
 .req-list-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:500}
 .req-list-item:last-child{border-bottom:none}
-#complete-page{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px 24px;text-align:center;overflow:hidden;position:relative;background:linear-gradient(160deg,#2A2A2A 0%,#3D3530 50%,#2A2A2A 100%)}
+#complete-page{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px 24px;text-align:center;overflow:hidden;position:relative;background:linear-gradient(135deg,#2A2A2A,#3D3530)}
 .confetti-piece{position:absolute;border-radius:3px}
-.stats-card{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 32px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);margin-bottom:24px;width:100%;max-width:320px}
+.stats-card{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 32px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);margin-bottom:20px}
 #install-prompt{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:0 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px)}
 .install-card{border-radius:16px;padding:14px;background:var(--white);border:1.5px solid var(--border);box-shadow:0 8px 32px rgba(42,42,42,.18);position:relative}
-.install-close{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.install-close{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .step-num{width:22px;height:22px;border-radius:50%;background:var(--orangedim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--orange);flex-shrink:0}
 .share-icon-box{width:22px;height:22px;background:#007AFF;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin:0 3px}
-.add-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;background:var(--surf2);border:1px solid var(--border);font-size:11px;font-weight:500;vertical-align:middle;margin:0 3px}
+.add-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;background:var(--surf2);border:1px solid var(--border);font-size:11px;font-weight:500;vertical-align:middle;margin-left:4px}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="topnav">
-    <img id="nav-logo" src="data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsnGbkM7MkYPMXbilUC7iaJQNi4ZfCMzqu1zYD1xbeFN7Qc32yGa6SzD0Dz2gqg6C9BAbrKNmddSKjOOrs12tBMF4So3JUJaxG4Bcv6fVQzeHRAJ5e0uEwDTjuJDf0HJ4EAG8kpwMcZY6NXB3h/sscWcUHKTzAP/ZCY/JX5g364crMibqhyQMfezFWLyOJNy0xczo2nrVN+0Y+qmq/2rTlg8bfnBQQuVtNmspWwzbC4s5MmgDgb44KcBauc5LjhKaJaObQ+fKvderx1lO8+fvbPjBIK6ieBX5HJ1H3CCxxK6kXObklbU0eUZ6VGtCBaWcKeq8SmL3MA88S33Jj3nRmUlXGjjlIUSP5mKNkGcqZkoZKTtTR9G5a3vaepfCF2g28SuGeGgPU5JYKfwcUOUUFOzCRUzrTvUTYPOUde9E6kybuaHrScANBOZO2i6N0gMqi6DEYpGkAErHB+AafGgBWUDggjgAAAHAIAJ0BKoEAQwA+MRKIQqIhIRcflAAgAwS0gxQADZAPoABMSLtblzrUwsc4wc2gG8mNC1Pd1kLURsch/mXW9aMip/4vXl3xaNwwvgAA/vkan//cP//9wj///t/e/wur/qDAWrHf//7U9R74dP0waKH/kyoqP7Ymmj/yZUA+f8mWh+v3gCTv//7URAAAAAA=" alt="Stackin' Days"/>
+    <img id="nav-logo" src="data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsFpDLBg6EB/hhqvn/PwUxyVCYu+nAbzKVPSGfX5A+ANn3h4EX3dUpxC0OMsXNJLMvAEGVTHCdMgW3yArpGJyy1Aqd4AMyAP7//Z+ABwD++P3//n8A/vjjjzwA5gEA"/>
   </div>
   <div id="page"></div>
   <div id="tabbar" style="display:none">
@@ -125,14 +127,14 @@ img{display:block}
       Today<div class="tab-dot" id="dot-home"></div>
     </button>
     <button class="tab-btn" id="tab-settings" onclick="switchTab('settings')">
-      <svg style="margin-bottom:3px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <svg style="margin-bottom:3px" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24M1 12h6m6 0h6m-17.78 7.78l4.24-4.24m2.12-2.12l4.24-4.24"/></svg>
       Settings
     </button>
   </div>
 </div>
 <script>
-const WHITE_LOGO="data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsnGbkM7MkYPMXbilUC7iaJQNi4ZfCMzqu1zYD1xbeFN7Qc32yGa6SzD0Dz2gqg6C9BAbrKNmddSKjOOrs12tBMF4So3JUJaxG4Bcv6fVQzeHRAJ5e0uEwDTjuJDf0HJ4EAG8kpwMcZY6NXB3h/sscWcUHKTzAP/ZCY/JX5g364crMibqhyQMfezFWLyOJNy0xczo2nrVN+0Y+qmq/2rTlg8bfnBQQuVtNmspWwzbC4s5MmgDgb44KcBauc5LjhKaJaObQ+fKvderx1lO8+fvbPjBIK6ieBX5HJ1H3CCxxK6kXObklbU0eUZ6VGtCBaWcKeq8SmL3MA88S33Jj3nRmUlXGjjlIUSP5mKNkGcqZkoZKTtTR9G5a3vaepfCF2g28SuGeGgPU5JYKfwcUOUUFOzCRUzrTvUTYPOUde9E6kybuaHrScANBOZO2i6N0gMqi6DEYpGkAErHB+AafGgBWUDggjgAAAHAIAJ0BKoEAQwA+MRKIQqIhIRcflAAgAwS0gxQADZAPoABMSLtblzrUwsc4wc2gG8mNC1Pd1kLURsch/mXW9aMip/4vXl3xaNwwvgAA/vkan//cP//9wj///t/e/wur/qDAWrHf//7U9R74dP0waKH/kyoqP7Ymmj/yZUA+f8mWh+v3gCTv//7URAAAAAA=";
-const DARK_LOGO="data:image/webp;base64,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";
+const WHITE_LOGO="data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsFpDLBg6EB/hhqvn/PwUxyVCYu+nAbzKVPSGfX5A+ANn3h4EX3dUpxC0OMsXNJLMvAEGVTHCdMgW3yArpGJyy1Aqd4AMyAP7//Z+ABwD++P3//n8A/vjjjzwA5gEA";
+const DARK_LOGO="data:image/webp;base64,UklGRlgMAABXRUJQVlA4WAoAAAAQAAAAgAAAQgAAQUxQSK8BAAABDzD/ERFCbrPtkRt9AwJitn+6kdnChveylS3EmKHgY0KX4FYo+Apdgim4gKUzCqb4BTx8VBDR/wnAZ968zbzJma+d097vzpyJ3wjOzN8AnAAsFpDLBg6EB/hhqvn/PwUxyVCYu+nAbzKVPSGfX5A+ANn3h4EX3dUpxC0OMsXNJLMvAEGVTHCdMgW3yArpGJyy1Aqd4AMyAP7//Z+ABwD++P3//n8A/vjjjzwA5gEA";
 
 const CHALLENGE_DAYS=60;
 const REQUIRED=[
@@ -257,8 +259,8 @@ function renderHome(){
   const done=new Set(S.todayRec?S.todayRec.completed:[]);
   const total=allItemIds(S.ci).length,doneCount=allItemIds(S.ci).filter(id=>done.has(id)).length;
   const isActive=streak>0,R=96,C=2*Math.PI*R,off=C*(1-Math.min(streak/CHALLENGE_DAYS,1));
-  const svgArc=streak>0?`<defs><linearGradient id="pg"><stop offset="0%" stop-color="#9F512E"/><stop offset="100%" stop-color="#C4673A"/></linearGradient></defs><circle cx="106" cy="106" r="${R}" fill="none" stroke="url(#pg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset .8s ease"/>`:'';
-  const pulseRings=isActive?`<div class="pulse-r pulse-ring" style="width:220px;height:220px;border:2px solid rgba(159,81,46,.3)"></div><div class="pulse-r pulse-ring" style="width:220px;height:220px;border:2px solid rgba(159,81,46,.15);animation-delay:.7s"></div>`:'';
+  const svgArc=streak>0?`<defs><linearGradient id="pg"><stop offset="0%" stop-color="#9F512E"/><stop offset="100%" stop-color="#C4673A"/></linearGradient></defs><circle cx="106" cy="106" r="${R}" fill="none" stroke="url(#pg)" stroke-width="5" stroke-dasharray="${C}" stroke-dashoffset="${off}" stroke-linecap="round"/>`:'';
+  const pulseRings=isActive?`<div class="pulse-r pulse-ring" style="width:220px;height:220px;border:2px solid rgba(159,81,46,.3)"></div><div class="pulse-r pulse-ring" style="width:220px;height:220px;border:2px solid rgba(159,81,46,.2);animation-delay:-.7s"></div>`:'';
   const badge=todayComplete?`<div class="streak-badge"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`:'';
   const status=todayComplete?'🥞 All done for today!':streak>0?`Keep it going — ${streak} day${streak!==1?'s':''} strong`:'Complete all items to start your streak';
   const reqItems=REQUIRED.map((it,i)=>itemRow(it.id,it.label,it.emoji,done.has(it.id),true,i)).join('');
@@ -289,7 +291,7 @@ function renderHome(){
           <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Today</div>
           <div style="font-family:'Caveat',cursive;font-size:20px;font-weight:600;color:var(--txt)">${formatDate(today())}</div>
         </div>
-        <div style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:${todayComplete?'var(--orangedim)':'var(--surf2)'};color:${todayComplete?'var(--orange)':'var(--muted)'}">${doneCount}/${total}</div>
+        <div style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:${todayComplete?'var(--orangedim)':'var(--surf2)'};color:${todayComplete?'var(--orange)':'var(--muted)'}"><span style="font-size:12px">${doneCount}/${total}</span></div>
       </div>
       <div class="section-label">Required</div>
       <div class="items-list">${reqItems}</div>
@@ -319,10 +321,10 @@ async function handleToggle(id){
 function renderSettings(){
   const dayNum=challengeDay(S.challenge.startDate),pct=Math.round(dayNum/CHALLENGE_DAYS*100);
   const startFmt=new Date(S.challenge.startDate+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  const reqHTML=REQUIRED.map(it=>`<div class="card-item"><span style="font-size:18px">${it.emoji}</span><span style="font-size:13px;font-weight:500;flex:1">${it.label}</span><span class="locked-badge">LOCKED</span></div>`).join('');
-  const addonsHTML=S.ci.map(it=>`<div class="addon-row"><span style="font-size:18px;flex-shrink:0">${it.emoji}</span><span style="font-size:13px;font-weight:500;flex:1;padding:0 8px">${it.label}</span><button class="btn-del btn-press" onclick="removeCustomItem('${it.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div>`).join('');
+  const reqHTML=REQUIRED.map(it=>`<div class="card-item"><span style="font-size:18px">${it.emoji}</span><span style="font-size:13px;font-weight:500;flex:1">${it.label}</span><span class="locked-badge">REQUIRED</span></div>`).join('');
+  const addonsHTML=S.ci.map(it=>`<div class="addon-row"><span style="font-size:18px;flex-shrink:0">${it.emoji}</span><span style="font-size:13px;font-weight:500;flex:1;padding:0 8px">${it.label}</span><button class="btn-del btn-press" onclick="removeCustomItem('${it.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join('');
   const emojiGrid=S.showEmoji?`<div class="emoji-grid">${EMOJIS.map(e=>`<button class="emoji-opt btn-press" onclick="pickEmoji('${e}')">${e}</button>`).join('')}</div>`:'';
-  const addForm=S.ci.length<3?`<div class="add-form"><div style="display:flex;gap:8px;margin-bottom:10px;position:relative"><button class="emoji-btn btn-press" onclick="toggleEmoji()">${S.newEmoji}</button>${emojiGrid}<input class="text-input" placeholder="Add-on name..." value="${S.newLabel}" oninput="S.newLabel=this.value" onkeydown="if(event.key==='Enter')addCustomItem()"/></div><button class="btn-primary btn-press" onclick="addCustomItem()" ${!S.newLabel.trim()?'disabled':''}>+ Add Item</button></div>`:'<div style="font-size:12px;text-align:center;color:var(--muted);padding:8px 0">Maximum 3 add-ons reached</div>';
+  const addForm=S.ci.length<3?`<div class="add-form"><div style="display:flex;gap:8px;margin-bottom:10px;position:relative"><button class="emoji-btn btn-press" onclick="toggleEmoji()">${S.newEmoji}</button><input type="text" class="text-input" id="new-addon-input" placeholder="Add custom item..." value="${S.newLabel}" onkeydown="if(event.key==='Enter')addCustomItem()" oninput="S.newLabel=this.value"/>${emojiGrid}<button class="btn-primary btn-press" onclick="addCustomItem()" style="padding:10px 16px;flex-shrink:0;width:auto">Add</button></div></div>`:'<div style="font-size:12px;color:var(--muted);text-align:center;padding:12px;background:var(--surf2);border-radius:12px">You've added your 3 custom items 🎉</div>';
   return `<div id="settings-page">
     <div class="settings-header">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Challenge</div>
@@ -344,11 +346,11 @@ function renderSettings(){
       <div style="margin-bottom:16px">${addonsHTML}${addForm}</div>
       <div class="section-title">Your Data</div>
       <div style="display:flex;gap:10px;margin-bottom:20px">
-        <button class="btn-secondary btn-press" style="flex:1" onclick="exportData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
-        <button class="btn-secondary btn-press" style="flex:1" onclick="importDataFile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>
+        <button class="btn-secondary btn-press" style="flex:1" onclick="exportData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+        <button class="btn-secondary btn-press" style="flex:1" onclick="importDataFile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import</button>
       </div>
       <div class="section-title">Danger Zone</div>
-      <button class="btn-danger btn-press" onclick="confirmRestart()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>Restart Challenge</button>
+      <button class="btn-danger btn-press" onclick="confirmRestart()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64M3.51 15A9 9 0 0 0 18.36 18.36"/></svg>Restart Challenge</button>
     </div>
   </div>`;
 }
@@ -381,11 +383,11 @@ function renderComplete(){
       <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:6px">60 Days. No excuses. All done.</p>
       <p style="font-size:13px;color:rgba(255,255,255,.4);line-height:1.6;max-width:300px;margin-bottom:24px">You showed up every single day. That's rare. That's Stackin' Days.</p>
       <div class="stats-card">
-        <div style="text-align:center"><div class="caveat" style="font-size:42px;font-weight:700;color:#fff">60</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4)">Days</div></div>
+        <div style="text-align:center"><div class="caveat" style="font-size:42px;font-weight:700;color:#fff">60</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-top:2px">Days Complete</div></div>
         <div style="width:1px;height:36px;background:rgba(255,255,255,.12)"></div>
-        <div style="text-align:center"><div class="caveat" style="font-size:42px;font-weight:700;color:#C4673A">100%</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4)">Complete</div></div>
+        <div style="text-align:center"><div class="caveat" style="font-size:42px;font-weight:700;color:#C4673A">100%</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-top:2px">Completion</div></div>
       </div>
-      <button class="btn-press" style="width:100%;max-width:320px;padding:16px;border-radius:16px;font-weight:600;font-size:15px;color:#fff;background:linear-gradient(135deg,#9F512E,#C4673A);font-family:inherit" onclick="startChallenge()">Start Another Challenge</button>
+      <button class="btn-press" style="width:100%;max-width:320px;padding:16px;border-radius:16px;font-weight:600;font-size:15px;color:#fff;background:linear-gradient(135deg,#9F512E,#C4673A);font-family:'Caveat',cursive" onclick="exportData()">💾 Save Your Victory</button>
       <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">Export your data first to save your progress.</p>
     </div>
   </div>`;
@@ -396,7 +398,7 @@ function startConfetti(){
   const cols=['#9F512E','#C4673A','#ffffff','#D4916A','#E8B89A'];
   for(let i=0;i<30;i++){
     const p=document.createElement('div');p.className='confetti-piece';
-    Object.assign(p.style,{left:Math.random()*100+'%',top:Math.random()*30+'%',width:(6+Math.random()*8)+'px',height:(6+Math.random()*8)+'px',background:cols[Math.floor(Math.random()*cols.length)],animationDelay:Math.random()*.8+'s',animationDuration:(.8+Math.random()*.7)+'s',opacity:0,position:'absolute',borderRadius:'3px'});
+    Object.assign(p.style,{left:Math.random()*100+'%',top:Math.random()*30+'%',width:(6+Math.random()*8)+'px',height:(6+Math.random()*8)+'px',background:cols[Math.floor(Math.random()*cols.length)],animation:`confetti-fall ${1.5+Math.random()}s ease-in forwards`,animationDelay:Math.random()*.4+'s'});
     c.appendChild(p);
   }
 }
@@ -407,7 +409,7 @@ function pickEmoji(e){S.newEmoji=e;S.showEmoji=false;renderPage();}
 function confirmRestart(){
   const ov=document.createElement('div');ov.className='overlay anim-overlay';ov.id='rst-ov';ov.onclick=closeConfirm;
   const sh=document.createElement('div');sh.className='sheet anim-modal';
-  sh.innerHTML='<div class="sheet-handle"></div><div class="sheet-content"><div style="font-size:44px;text-align:center;margin-bottom:8px">⚠️</div><div class="caveat" style="font-size:22px;font-weight:600;text-align:center;margin-bottom:6px">Restart Challenge?</div><p style="font-size:13px;text-align:center;color:var(--muted);margin-bottom:24px">This erases all progress. Export first if you want to save it.</p><div style="display:flex;gap:10px"><button class="btn-secondary btn-press" style="flex:1;padding:14px" onclick="closeConfirm()">Cancel</button><button class="btn-press" style="flex:1;padding:14px;border-radius:14px;font-weight:600;font-size:14px;background:#ef4444;color:#fff;font-family:inherit" onclick="doRestart()">Restart</button></div></div>';
+  sh.innerHTML='<div class="sheet-handle"></div><div class="sheet-content"><div style="font-size:44px;text-align:center;margin-bottom:8px">⚠️</div><div class="caveat" style="font-size:22px;font-weight:600;color:var(--txt);margin-bottom:8px">Restart?</div><p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Starting over will reset your streak and progress. Your data won\'t be deleted — you can still export it.</p><button class="btn-danger btn-press" style="margin-bottom:10px" onclick="doRestart()">Yes, Restart</button><button class="btn-secondary btn-press" style="width:100%" onclick="closeConfirm()">Cancel</button></div>';
   document.body.appendChild(ov);document.body.appendChild(sh);
 }
 function closeConfirm(){document.getElementById('rst-ov')?.remove();document.querySelector('.sheet')?.remove();}
@@ -422,9 +424,9 @@ function showInstallPrompt(type){
   if(standalone)return;
   const el=document.createElement('div');el.id='install-prompt';el.className='anim-overlay';
   if(type==='ios'){
-    el.innerHTML=`<div class="install-card"><button class="install-close btn-press" onclick="dismissInstall()"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="2.2"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="${WHITE_LOGO}" style="width:24px"/></div><div><div style="font-size:13px;font-weight:600">Add to Home Screen</div><div style="font-size:11px;color:var(--muted)">Get the full app experience</div></div></div><div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><div class="step-num">1</div><div style="font-size:13px">Tap the <span class="share-icon-box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span> Share button</div></div><div style="display:flex;align-items:center;gap:8px"><div class="step-num">2</div><div style="font-size:13px">Tap <span class="add-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to Home Screen</span></div></div></div></div>`;
+    el.innerHTML=`<div class="install-card"><button class="install-close btn-press" onclick="dismissInstall()"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M1 13L13 1"/></svg></button><div style="display:flex;align-items:center;gap:12px"><img src="${WHITE_LOGO}" style="width:44px;height:44px;object-fit:contain;border-radius:12px"/><div><div class="step-num">1</div><p style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:2px">Add to Home Screen</p><p style="font-size:12px;color:var(--muted)">Open Safari menu → tap Share → <span class="add-chip">Add to Home Screen</span></p></div></div></div>`;
   } else {
-    el.innerHTML=`<div class="install-card" style="display:flex;align-items:center;gap:10px"><button class="install-close btn-press" onclick="dismissInstall()"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="2.2"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button><div style="width:40px;height:40px;border-radius:10px;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="${WHITE_LOGO}" style="width:28px"/></div><div style="flex:1;min-width:0;padding-right:20px"><div style="font-size:13px;font-weight:600">Install Stackin' Days</div><div style="font-size:11px;color:var(--muted)">Add to home screen</div></div><button class="btn-press" style="flex-shrink:0;padding:8px 14px;border-radius:12px;font-weight:600;font-size:13px;background:linear-gradient(135deg,#2A2A2A,#3D3530);color:#fff;font-family:inherit" onclick="doInstall()">Install</button></div>`;
+    el.innerHTML=`<div class="install-card" style="display:flex;align-items:center;gap:10px"><button class="install-close btn-press" onclick="dismissInstall()"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M1 13L13 1"/></svg></button><div style="flex:1"><p style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px">Install Stackin' Days</p><p style="font-size:12px;color:var(--muted)">Add to your home screen for quick access</p></div><button class="btn-primary btn-press" style="flex-shrink:0;padding:8px 14px;width:auto;font-size:13px" onclick="doInstall()">Install</button></div>`;
   }
   document.body.appendChild(el);
 }
